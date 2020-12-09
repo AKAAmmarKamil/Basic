@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "RIxPtmTHs97DDx6oMIoNX9lG/OZRclF0rkBx+rlfQHVsrgODAipYRWpavsfg/37GxX6YKP0qgtZjfb7JgqQbLQ==",
+  "dgSpecHash": "ibyQUsaNEn63ntsz+yshZVjneSDuU1IchDojfXhDfOEEl8iDEKyggJ2qelPTCR5ouN3om6N32/jKVa8+viTW8w==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Lenovo\\source\\repos\\WebApplication2\\WebApplication2\\WebApplication2.csproj",
+  "projectFilePath": "F:\\Basic\\WebApplication2\\WebApplication2\\WebApplication2.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Lenovo\\.nuget\\packages\\automapper\\10.1.1\\automapper.10.1.1.nupkg.sha512",
     "C:\\Users\\Lenovo\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\8.1.0\\automapper.extensions.microsoft.dependencyinjection.8.1.0.nupkg.sha512",
