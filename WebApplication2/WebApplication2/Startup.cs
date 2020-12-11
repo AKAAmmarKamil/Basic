@@ -55,8 +55,7 @@ namespace WebApplication2
             });
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "Put title here", Description = "DotNet Core Api 3 - with swagger" }); });
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            services.AddScoped<IUser, MockUser>();
-
+            //services.AddScoped(typeof(IBaseRepository<User, User>), typeof(BaseRepository<User, User>));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

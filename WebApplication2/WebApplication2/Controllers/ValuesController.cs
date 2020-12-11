@@ -27,10 +27,10 @@ namespace WebApplication2.Controllers
     {
         private IConfiguration _Configuration;
        private readonly Context _dbContext;
-        private readonly IUser _user;
+        private readonly IBaseRepository<User,Guid> _user;
         private readonly IMapper _mapper;
-        private readonly MockUser _mockUser;
-        public ValuesController( IConfiguration configuration, IUser user,IMapper mapper,Context context,MockUser mockUser)
+        private readonly BaseRepository<User, Guid> _mockUser;
+        public ValuesController( IConfiguration configuration, IBaseRepository<User, Guid> user,IMapper mapper,Context context,BaseRepository<User, Guid> mockUser)
         {
             _Configuration = configuration;
             _dbContext = context;
@@ -41,7 +41,7 @@ namespace WebApplication2.Controllers
         [HttpGet("{id}",Name = "GetUserById")]
         public ActionResult<UserReadDto> GetUserById(Guid Id)
         {
-            var result = _user.GetUserById(Id);
+            var result = _user.readById(Id);
             if(result !=null)
             {
                 return Ok(_mapper.Map<UserReadDto>(result));
@@ -49,11 +49,11 @@ namespace WebApplication2.Controllers
             }
             return NotFound();
         }
-        [Authorize]
+        //[Authorize]
         [HttpGet]
         public ActionResult <UserReadDto> GetAllUsers()
         {
-            var result = _user.GetAllUsers();
+            var result = _user.read();
             return Ok(_mapper.Map<IEnumerable<UserReadDto>>(result));
         }
         [Authorize(Roles ="Admin")]
@@ -61,7 +61,7 @@ namespace WebApplication2.Controllers
         public ActionResult<UserReadDto> Create(UserCreateDto userCreateDto)
         {
             var UserModel = _mapper.Map<User>(userCreateDto);
-            _user.Create(UserModel);
+            _user.create(UserModel);
             _user.SaveChanges();
             var UserReadDto = _mapper.Map<UserReadDto>(UserModel);
             return CreatedAtRoute(nameof(GetUserById),new { Id=UserReadDto.Id},UserReadDto);
@@ -70,20 +70,20 @@ namespace WebApplication2.Controllers
         [HttpPut("{id}")]
         public ActionResult Update(Guid id,UserUpdateDto userUpdateDto)
         {
-            var UserModelFromRepo = _user.GetUserById(id);
+            var UserModelFromRepo = _user.readById(id);
             if (UserModelFromRepo == null)
             {
                 return NotFound();
             }
             _mapper.Map(userUpdateDto, UserModelFromRepo);
-            _user.Update(UserModelFromRepo);
+            _user.update(UserModelFromRepo);
             _user.SaveChanges();
             return NoContent();
         }
         [HttpPatch("{id}")]
         public ActionResult PartialCommandUpdate(Guid id, JsonPatchDocument<UserUpdateDto> patchDoc)
         {
-            var commandModelFromRepo = _user.GetUserById(id);
+            var commandModelFromRepo = _user.readById(id);
             if (commandModelFromRepo == null)
             {
                 return NotFound();
@@ -99,19 +99,35 @@ namespace WebApplication2.Controllers
 
             _mapper.Map(commandToPatch, commandModelFromRepo);
 
-            _user.Update(commandModelFromRepo);
+            _user.update(commandModelFromRepo);
 
             _user.SaveChanges();
 
             return NoContent();
         }
         [HttpPost]
-        public async Task<ActionResult<User>> Login([FromBody] User model)
+        public async Task<ActionResult<User>> Login([FromBody] User form)
         {
-            var response = await _mockUser.Authenticate(model);
-            if (response != "")
+            var user = await _dbContext.User.FirstOrDefaultAsync(x => x.UserName == form.UserName && x.Password == form.Password);
+            if (user != null)
             {
-                return Ok(response);
+                var claims = new[]
+                {
+                   new Claim("Username", user.UserName),
+                    new Claim(ClaimTypes.Role, user.Role),
+                    new Claim("Role", user.Role),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                };
+                var token = new JwtSecurityToken(claims: claims, expires: DateTime.UtcNow.AddDays(30),
+                  notBefore: DateTime.UtcNow, audience: "Audience", issuer: "Issuer",
+                  signingCredentials: new SigningCredentials(
+                      new SymmetricSecurityKey(
+                          Encoding.UTF8.GetBytes("Hlkjds0-324mf34pojf-14r34fwlknef0943")),
+                      SecurityAlgorithms.HmacSha256));
+                var Token = new JwtSecurityTokenHandler().WriteToken(token);
+                var expire = DateTime.UtcNow.AddDays(30);
+                return Ok(new { Token = Token, Expire = expire });
+
             }
             else return BadRequest();
 

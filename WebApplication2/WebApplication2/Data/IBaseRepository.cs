@@ -9,15 +9,15 @@ using User = WebApplication2.Model.User;
 
 namespace WebApplication2.Data
 {
-    public interface IUser
+    public interface IBaseRepository<T, K>
     {
-        User GetUserById(Guid Id);
-        User GetUser(string UserName,string Password);
+        List<T> read();
 
-        IEnumerable<User> GetAllUsers();
-        void Create(User user);
-        void Update(User user);
-
+        T readById(K id);
+        Task<T> create(T entity);
+        T update(T entity);
+        T delete(T entity);
         bool SaveChanges();
+        T GetUser(string UserName, string Password);
     }
 }

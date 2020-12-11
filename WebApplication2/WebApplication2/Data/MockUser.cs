@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 using WebApplication2.Model;
 namespace WebApplication2.Data
 {
-    public class MockUser : IUser
+    public abstract class BaseRepository<T, TId> : IBaseRepository<T, TId> where T:User
     {
         private readonly Context _context;
-        private readonly IUser _wrapper;
+        private readonly IBaseRepository<T,TId> _wrapper;
         private readonly IMapper _mapper;
 
 
-        public MockUser(IUser wrapper, IMapper mapper,Context context)
+        public BaseRepository(IBaseRepository<T,TId> wrapper, IMapper mapper,Context context)
         {
             _wrapper = wrapper;
             _mapper = mapper;
@@ -58,20 +58,46 @@ namespace WebApplication2.Data
         {
             return _context.User.ToList();
         }
-        public void Create(User user)
-        {
-            if (user == null)
-            {
-                throw new ArgumentException(nameof(user));
-            }
-            _context.User.Add(user);
-        }
-        public void Update(User user)
-        {
-        }
         public bool SaveChanges()
         {
             return (_context.SaveChanges() >= 0);
+        }
+
+        public async Task<T> Create(T t)
+        {
+            await _context.Set<T>().AddAsync(t);
+            await _context.SaveChangesAsync();
+            return t;
+        }
+
+        public List<T> read()
+        {
+            throw new NotImplementedException();
+        }
+
+        public T readById(TId id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public T delete(T entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<T> create(T entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public T update(T entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        T IBaseRepository<T, TId>.GetUser(string UserName, string Password)
+        {
+            throw new NotImplementedException();
         }
     }
 }
